@@ -1,2 +1,7 @@
-<h1>Welcome to Finance</h1>
-<router-outlet></router-outlet>
+<div class="app-wrapper">
+    <p-menubar [model]="navigationItems"></p-menubar>
+
+    <div class="content">
+        <router-outlet></router-outlet>
+    </div>
+</div>

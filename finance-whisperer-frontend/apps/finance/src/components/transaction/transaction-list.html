@@ -1,0 +1,27 @@
+<div class="container">
+    <h2>Deine Umsätze</h2>
+    <p-table [value]="transactions()" stripedRows>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Datum</th>
+                <th>Beschreibung</th>
+                <th>Kategorie</th>
+                <th>Betrag</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-transaction>
+            <tr [class.expense]="transaction.type === 'EXPENSE'" [class.income]="transaction.type === 'INCOME'">
+                <td>{{ transaction.date | date:'dd.MM.yyyy' }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>
+                    <span class="badge">{{ transaction.category }}</span>
+                </td>
+                <td [style.color]="transaction.type === 'EXPENSE' ? 'red' : 'green'">
+                    {{ transaction.amount | currency:'EUR' }}
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <button (click)="addTransaction()">Umsatz hinzfügen</button>
+</div>
