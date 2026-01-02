@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: finance_whisperer_database
+    environment:
+      POSTGRES_USER: savas
+      POSTGRES_PASSWORD: gariban01
+      POSTGRES_DB: finance_whisperer_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

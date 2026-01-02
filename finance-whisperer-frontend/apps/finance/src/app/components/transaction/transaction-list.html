@@ -1,0 +1,61 @@
+<div class="container">
+    <h2>Deine Umsätze</h2>
+    <p-table [value]="transactions()" stripedRows>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Datum</th>
+                <th>Beschreibung</th>
+                <th>Kategorie</th>
+                <th>Betrag</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-transaction>
+            <tr [class.expense]="transaction.type === 'EXPENSE'" [class.income]="transaction.type === 'INCOME'">
+                <td>{{ transaction.date | date:'dd.MM.yyyy' }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>
+                    <span class="badge">{{ transaction.category }}</span>
+                </td>
+                <td [style.color]="transaction.type === 'EXPENSE' ? 'red' : 'green'">
+                    {{ transaction.amount | currency:'EUR' }}
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+    <button pButton (click)="openNewTransactionDialog()">
+        <i class="pi pi-check" pButtonIcon></i>
+        <span pButtonLabel>Add Transaction</span>
+    </button>
+</div>
+<p-dialog header="Neuer Eintrag" [(visible)]="isDialogVisible" [modal]="true" [style]="{ width: '400px' }">
+
+    <form [formGroup]="transactionForm" class="flex flex-column gap-3 pt-3">
+
+        <div class="flex flex-column gap-2">
+            <label>Beschreibung</label>
+            <input pInputText formControlName="description" placeholder="z.B. Supermarkt" />
+        </div>
+
+        <div class="flex flex-column gap-2">
+            <label>Betrag</label>
+            <p-inputNumber formControlName="amount" mode="currency" currency="EUR" locale="de-DE"></p-inputNumber>
+        </div>
+
+        <div class="flex flex-column gap-2">
+            <label>Typ</label>
+            <p-select [options]="transactionTypes" formControlName="type" optionLabel="label"
+                optionValue="value"></p-select>
+        </div>
+
+        <div class="flex flex-column gap-2">
+            <label>Kategorie</label>
+            <input pInputText formControlName="category" />
+        </div>
+
+    </form>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Abbrechen" (onClick)="isDialogVisible = false" styleClass="p-button-text"></p-button>
+        <p-button label="Speichern" (onClick)="addTransaction()" [disabled]="transactionForm.invalid"></p-button>
+    </ng-template>
+</p-dialog>
