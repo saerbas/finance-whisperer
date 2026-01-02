@@ -151,3 +151,4 @@ src/.vs/config/applicationhost.config
 bin/
 obj/
 
+.vscode/
