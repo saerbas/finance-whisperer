@@ -152,3 +152,4 @@ bin/
 obj/
 
 .vscode/
+.DS_Store
