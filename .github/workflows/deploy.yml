@@ -1,0 +1,26 @@
+name: Deploy Infrastructure
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    deploy-infrascture:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: azure/login@v1
+              with:
+                  creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+            - name: Deploy Bicep File
+              uses: azure/arm-deploy@v1
+              with:
+                  subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+                  resourceGroupName: "finance-whisperer"
+                  scope: "resourcegroup"
+                  template: ./infra/main.bicep
+                  failOnStdErr: false
