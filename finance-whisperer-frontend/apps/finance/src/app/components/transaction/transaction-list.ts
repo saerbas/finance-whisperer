@@ -10,6 +10,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { v4 as uuidv4 } from 'uuid';
+import { ChartModule } from 'primeng/chart';
 
 @Component({
   selector: 'app-transaction-list',
@@ -23,7 +24,8 @@ import { v4 as uuidv4 } from 'uuid';
     DialogModule,
     InputTextModule,
     InputNumberModule,
-    SelectModule
+    SelectModule,
+    ChartModule
   ],
   templateUrl: './transaction-list.html',
   styleUrl: './transaction-list.css',
@@ -37,6 +39,12 @@ export class TransactionList implements OnInit {
 
   // controll dialog visibility
   public isDialogVisible = false;
+
+  // chart data
+  chartData: any;
+  chartOptions: any;
+
+  selectedTransaction: Transaction | null = null;
 
   transactionForm = this.formBuilder.group({
     description: ['', Validators.required],
@@ -54,14 +62,16 @@ export class TransactionList implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.loadData();
 
+    this.loadData();
+    this.initChartOptions();
   }
   loadData() {
     this.transactionService.getTransactions().subscribe({
       next: (response: Transaction[]) => {
 
         this.transactions.set(response);
+        this.updateChart(response);
       },
       error: (error: any) => {
         console.log('Error fetching transactions:', error);
@@ -104,5 +114,64 @@ export class TransactionList implements OnInit {
       }
     });
 
+  }
+  deleteTransaction(transaction: Transaction) {
+    const updatedTransactions = this.transactions().filter(t => t.id !== transaction.id);
+    this.transactions.set(updatedTransactions);
+    this.updateChart(updatedTransactions);
+  }
+  updateChart(transactions: Transaction[], highlightId: number | null = null) {
+    const dataToShow = transactions;
+
+    const labels = dataToShow.map(t => {
+      const dateStr = new Date(t.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+      return `${dateStr} ${t.description}`;
+    });
+
+    // 2. Daten extrahieren (Beträge)
+    const data = dataToShow.map(t => t.amount);
+
+    const backgroundColors = dataToShow.map(t => {
+      if (highlightId && t.id === highlightId) {
+        return '#000'; // SCHWARZ für ausgewählt
+      }
+      return t.type === 'EXPENSE' ? '#42A5F5' : '#66BB6A';
+    });
+
+    this.chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Betrag',
+          data: data,
+          backgroundColor: backgroundColors,
+          borderWidth: 1
+        }
+      ]
+    };
+  }
+
+  onRowSelect(event: any) {
+    const selected = event.data as Transaction;
+    this.updateChart(this.transactions(), selected.id);
+  }
+
+  onRowUnselect() {
+    this.updateChart(this.transactions(), null);
+  }
+
+  initChartOptions() {
+    this.chartOptions = {
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    };
   }
 }

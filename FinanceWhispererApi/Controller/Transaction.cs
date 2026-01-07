@@ -1,6 +1,6 @@
 using FinanceWhispererApi.Data;
+using FinanceWhispererApi.DTO.Transaction;
 using FinanceWhispererApi.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +12,6 @@ namespace FinanceWhispererApi.Controller
     {
         private readonly FinanceDbContext _context;
 
-        // Dependency Injection: Wir lassen uns die DB geben
         public TransactionsController(FinanceDbContext context)
         {
             _context = context;
@@ -21,18 +20,40 @@ namespace FinanceWhispererApi.Controller
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactions()
         {
-            // Holt ECHTE Daten aus der DB
             return await _context.Transactions.ToListAsync();
         }
 
-        // Neu: Eine Methode zum Anlegen, damit wir Daten reinbekommen
         [HttpPost]
-        public async Task<ActionResult<Transaction>> PostTransaction(Transaction transaction)
+        public async Task<ActionResult<TransactionDTO>> PostTransaction(TransactionDTO createTransaction)
         {
+            var transaction = new Transaction
+            {
+                Date = createTransaction.Date,
+                Amount = createTransaction.Amount,
+                Description = createTransaction.Description,
+                Category = createTransaction.Category,
+                Type = createTransaction.Type
+            };
+
             _context.Transactions.Add(transaction);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetTransactions), new { id = transaction.Id }, transaction);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<IEnumerable<Transaction>>> DeleteTransaction(int id)
+        {
+            var transaction = await _context.Transactions.FindAsync(id);
+
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            _context.Transactions.Remove(transaction);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

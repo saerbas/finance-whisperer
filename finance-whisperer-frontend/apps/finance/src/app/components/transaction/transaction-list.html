@@ -1,6 +1,7 @@
 <div class="container">
     <h2>Deine Umsätze</h2>
-    <p-table [value]="transactions()" stripedRows>
+    <p-table [value]="transactions()" selectionMode="single" [(selection)]="selectedTransaction"
+        (onRowSelect)="onRowSelect($event)" (onRowUnselect)="onRowUnselect()">
         <ng-template pTemplate="header">
             <tr>
                 <th>Datum</th>
@@ -10,7 +11,8 @@
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-transaction>
-            <tr [class.expense]="transaction.type === 'EXPENSE'" [class.income]="transaction.type === 'INCOME'">
+            <tr [class.expense]="transaction.type === 'EXPENSE'" [class.income]="transaction.type === 'INCOME'"
+                [pSelectableRow]="transaction">
                 <td>{{ transaction.date | date:'dd.MM.yyyy' }}</td>
                 <td>{{ transaction.description }}</td>
                 <td>
@@ -18,6 +20,10 @@
                 </td>
                 <td [style.color]="transaction.type === 'EXPENSE' ? 'red' : 'green'">
                     {{ transaction.amount | currency:'EUR' }}
+                </td>
+                <td>
+                    <button pButton icon="pi pi-trash" class="p-button-danger"
+                        (click)="deleteTransaction(transaction); $event.stopPropagation();"></button>
                 </td>
             </tr>
         </ng-template>
@@ -59,3 +65,8 @@
         <p-button label="Speichern" (onClick)="addTransaction()" [disabled]="transactionForm.invalid"></p-button>
     </ng-template>
 </p-dialog>
+
+<div class="col-12 md:col-12 lg:col-12 mb-4"> @if (chartData) {
+    <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="300px"></p-chart>
+    }
+</div>
